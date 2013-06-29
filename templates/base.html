@@ -59,6 +59,9 @@
 		.feed-title, .folder-title {
 			padding: 2px;
 		}
+		.feed-title.active, .folder-title.active {
+			color: #bf0303;
+		}
 		.feed-title:hover, .folder-title:hover {
 			background-color: #eee;
 		}
@@ -321,7 +324,7 @@
 							All items ({{`{{unread.all || 0}}`}})
 						</li>
 						<li ng-repeat="f in feeds">
-							<div class="hand feed-title" ng-hide="f.Outline || isHiddenFeed(f)" ng-click="setActiveFeed(f.XmlUrl)">
+							<div class="hand feed-title" ng-class="{active: f.active}" ng-hide="f.Outline || isHiddenFeed(f)" ng-click="setActiveFeed(f)">
 								<img {{htmlattr `ng-src="{{icons[f.XmlUrl] || '/static/img/feed.png'}}"`}} class="feed-icon">
 								<span ng-class="{bold: isUpdatedFeed(f)}" ng-bind="f.Title"></span>
 								<span ng-show="unread['feeds'][f.XmlUrl]">
@@ -329,7 +332,7 @@
 								</span>
 							</div>
 							<div ng-show="f.Outline && !isHiddenFeed(f)">
-								<div class="hand folder-title" ng-show="f.Outline" ng-click="setActiveFolder(f.Title)">
+								<div class="hand folder-title" ng-class="{active: f.active}" ng-show="f.Outline" ng-click="setActiveFolder(f)">
 									<i class="icon-folder-open hand" ng-hide="opts.folderClose[f.Title]" ng-click="opts.folderClose[f.Title] = true; saveOpts()"></i>
 									<i class="icon-folder-close hand" ng-show="opts.folderClose[f.Title]" ng-click="opts.folderClose[f.Title] = false; saveOpts()"></i>
 									<span ng-class="{bold: isUpdatedFeed(f)}" ng-bind="f.Title"></span>
@@ -339,7 +342,7 @@
 								</div>
 								<ul class="unstyled" ng-hide="opts.folderClose[f.Title]">
 									<li ng-repeat="o in f.Outline">
-										<div class="hand feed-title feed-child" ng-click="setActiveFeed(o.XmlUrl)" ng-hide="isHiddenFeed(o)">
+										<div class="hand feed-title feed-child" ng-class="{active: o.active}" ng-click="setActiveFeed(o)" ng-hide="isHiddenFeed(o)">
 											<img {{htmlattr `ng-src="{{icons[o.XmlUrl] || '/static/img/feed.png'}}"`}} class="feed-icon">
 											<span ng-class="{bold: unread['feeds'][o.XmlUrl]}" ng-bind="o.Title"></span>
 											<span ng-show="unread['feeds'][o.XmlUrl]">

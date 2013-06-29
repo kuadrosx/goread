@@ -231,8 +231,8 @@ function GoreadCtrl($scope, $http, $timeout, $window) {
 	}
 
 	$scope.updateUnreadCurrent = function() {
-		if ($scope.activeFeed) $scope.unread.current = $scope.unread.feeds[$scope.activeFeed];
-		else if ($scope.activeFolder) $scope.unread.current = $scope.unread.folders[$scope.activeFolder];
+		if ($scope.activeFeed) $scope.unread.current = $scope.unread.feeds[$scope.activeFeed.XmlUrl];
+		else if ($scope.activeFolder) $scope.unread.current = $scope.unread.folders[$scope.activeFolder.Title];
 		else $scope.unread.current = $scope.unread.all;
 	};
 
@@ -273,8 +273,8 @@ function GoreadCtrl($scope, $http, $timeout, $window) {
 	};
 
 	$scope.active = function() {
-		if ($scope.activeFolder) return $scope.activeFolder;
-		if ($scope.activeFeed) return $scope.xmlurls[$scope.activeFeed].Title;
+		if ($scope.activeFolder) return $scope.activeFolder.Title;
+		if ($scope.activeFeed) return $scope.xmlurls[$scope.activeFeed.XmlUrl].Title;
 		return 'All items';
 	};
 
@@ -366,8 +366,13 @@ function GoreadCtrl($scope, $http, $timeout, $window) {
 	};
 
 	$scope.setActiveFeed = function(feed) {
+		if($scope.activeFolder)
+			$scope.activeFolder.active = false;
 		delete $scope.activeFolder;
+		if($scope.activeFeed)
+			$scope.activeFeed.active = false;
 		$scope.activeFeed = feed;
+		feed.active = true;
 		delete $scope.currentStory;
 		$scope.updateStories();
 		$scope.applyGetFeed();
@@ -375,7 +380,10 @@ function GoreadCtrl($scope, $http, $timeout, $window) {
 	};
 
 	$scope.setActiveFolder = function(folder) {
+		if($scope.activeFeed)
+			$scope.activeFeed.active = false
 		delete $scope.activeFeed;
+		folder.active = true
 		$scope.activeFolder = folder;
 		delete $scope.currentStory;
 		$scope.updateStories();
@@ -394,13 +402,13 @@ function GoreadCtrl($scope, $http, $timeout, $window) {
 		if ($scope.activeFolder) {
 			for (var i = 0; i < $scope.stories.length; i++) {
 				var s = $scope.stories[i];
-				if ($scope.xmlurls[s.feed.XmlUrl].folder == $scope.activeFolder) {
+				if ($scope.xmlurls[s.feed.XmlUrl].folder == $scope.activeFolder.Title) {
 					$scope.dispStories.push(s);
 				}
 			}
 		} else if ($scope.activeFeed) {
 			if ($scope.mode != 'unread') {
-				angular.forEach($scope.readStories[$scope.activeFeed], function(s) {
+				angular.forEach($scope.readStories[$scope.activeFeed.XmlUrl], function(s) {
 					if ($scope.unreadStories[s.guid]) {
 						s.read = false;
 					}
@@ -409,7 +417,7 @@ function GoreadCtrl($scope, $http, $timeout, $window) {
 			} else {
 				for (var i = 0; i < $scope.stories.length; i++) {
 					var s = $scope.stories[i];
-					if (s.feed.XmlUrl == $scope.activeFeed) {
+					if (s.feed.XmlUrl == $scope.activeFeed.XmlUrl) {
 						$scope.dispStories.push(s);
 					}
 				}
@@ -465,7 +473,7 @@ function GoreadCtrl($scope, $http, $timeout, $window) {
 	$scope.cursors = {};
 	$scope.fetching = {};
 	$scope.getFeed = function() {
-		var f = $scope.activeFeed;
+		var f = $scope.activeFeed.XmlUrl;
 		if (!f || $scope.fetching[f]) return;
 		if ($scope.dispStories.length != 0) {
 			var sh = sl[0].scrollHeight;
@@ -481,7 +489,7 @@ function GoreadCtrl($scope, $http, $timeout, $window) {
 		})).success(function (data) {
 			if (!data || !data.Stories) return
 			delete $scope.fetching[f]
-			$scope.cursors[$scope.activeFeed] = data.Cursor;
+			$scope.cursors[$scope.activeFeed.XmlUrl] = data.Cursor;
 			if (!$scope.readStories[f])
 				$scope.readStories[f] = [];
 			for (var i = 0; i < data.Stories.length; i++) {
